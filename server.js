@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // --- 1. KẾT NỐI MONGODB ATLAS ---
-const cloudURI = "mongodb+srv://anh96212_db_user:anh123456@cluster0.4zc3fiy.mongodb.net/tuoicay_smart?appName=Cluster0";
+const cloudURI = "mongodb+srv://anh96212_db_user:anh123456@cluster0.t7ouowo.mongodb.net/?appName=Cluster0";
 
 mongoose.connect(cloudURI)
     .then(async () => {
@@ -135,4 +135,5 @@ app.get('/api/report/stats', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => console.log(`Server đang chạy tại port ${PORT}`));
+
 
