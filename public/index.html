@@ -3,101 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Garden Pro</title>
+    <title>Smart Garden Pro | UI Redesign</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* CSS Giữ nguyên */
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f0f2f5; }
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .login-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .login-btn { width: 100%; padding: 10px; background: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;}
+        :root {
+            --primary: #00b894;
+            --secondary: #0984e3;
+            --danger: #ff7675;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%); /* Nền xanh thiên nhiên */
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        /* --- LOGIN SCREEN --- */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .login-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 50px;
+            border-radius: 20px;
+            width: 320px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            animation: slideUp 0.5s ease;
+        }
+        .login-box h2 { margin-bottom: 20px; color: var(--primary); }
+        .login-input {
+            width: 100%; padding: 15px; margin: 10px 0;
+            border: 2px solid #eee; border-radius: 12px;
+            box-sizing: border-box; font-family: 'Poppins'; outline: none; transition: 0.3s;
+        }
+        .login-input:focus { border-color: var(--primary); }
+        .login-btn {
+            width: 100%; padding: 15px; margin-top: 10px;
+            background: var(--primary); color: white;
+            border: none; border-radius: 12px;
+            cursor: pointer; font-weight: bold; font-size: 16px;
+            transition: 0.3s;
+        }
+        .login-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4); }
+
+        /* --- MAIN LAYOUT --- */
+        #main-app { display: none; display: flex; height: 100vh; overflow: hidden; }
         
-        #main-app { display: none; display: flex; height: 100vh; }
-        .sidebar { width: 250px; background: #2d3436; color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { margin-bottom: 30px; text-align: center; color: #00b894; }
-        .menu-item { padding: 15px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
-        .menu-item:hover, .menu-item.active { background: #636e72; }
-        .logout { margin-top: auto; background: #d63031; text-align: center; }
-        .content { flex: 1; padding: 30px; overflow-y: auto; }
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.5s; }
-        .dashboard-grid { display: flex; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; padding: 20px; border-radius: 10px; flex: 1; min-width: 200px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        .value { font-size: 40px; font-weight: bold; color: #2d3436; }
-        .label { color: #636e72; font-size: 14px; margin-bottom: 10px; display: block;}
-        .control-panel { margin-top: 30px; background: white; padding: 20px; border-radius: 10px; }
-        .btn { padding: 12px 25px; margin-right: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
-        .btn:disabled { background-color: #ccc !important; cursor: not-allowed; }
-        .btn-on { background: #00b894; } .btn-off { background: #d63031; } .btn-auto { background: #0984e3; } .btn-manual { background: #e17055; }
-        .config-form { max-width: 400px; background: white; padding: 30px; border-radius: 10px; }
-        .date-picker { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 20px; }
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            display: flex; flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.05);
+        }
+        .sidebar h2 {
+            margin-bottom: 40px; text-align: center;
+            color: var(--primary); font-weight: 800; letter-spacing: 1px;
+        }
+        .menu-item {
+            padding: 15px 20px; margin-bottom: 10px;
+            cursor: pointer; border-radius: 12px;
+            font-weight: 600; color: #636e72;
+            transition: all 0.3s ease; display: flex; align-items: center; gap: 10px;
+        }
+        .menu-item:hover { background: rgba(0, 184, 148, 0.1); color: var(--primary); padding-left: 25px; }
+        .menu-item.active { background: var(--primary); color: white; box-shadow: 0 5px 15px rgba(0, 184, 148, 0.3); }
+        .logout { margin-top: auto; background: #ffeaa7; color: #d63031; }
+        .logout:hover { background: #d63031; color: white; }
+
+        /* CONTENT */
+        .content { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+        .header-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px;
+        }
+        .header-bar h2 { font-size: 28px; font-weight: 700; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.1); margin: 0; }
+        .user-badge {
+            background: rgba(255,255,255,0.9); padding: 8px 15px;
+            border-radius: 30px; font-size: 14px; font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* --- GARDEN SELECTOR --- */
+        .garden-selector {
+            background: white; padding: 15px 20px; border-radius: 15px;
+            display: inline-flex; align-items: center; gap: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 30px;
+        }
+        .garden-selector select {
+            border: none; background: #f1f2f6; padding: 10px 15px;
+            border-radius: 8px; font-weight: 600; color: var(--dark);
+            font-family: 'Poppins'; outline: none; cursor: pointer;
+        }
+
+        /* --- DASHBOARD CARDS --- */
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;
+        }
+        .card {
+            background: var(--glass); backdrop-filter: blur(16px);
+            padding: 25px; border-radius: 20px;
+            box-shadow: var(--shadow); border: 1px solid var(--glass-border);
+            text-align: center; transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .label { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: #636e72; opacity: 0.8; }
+        .value { font-size: 50px; font-weight: 800; margin: 10px 0; background: -webkit-linear-gradient(#2d3436, #636e72); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+        
+        /* Màu riêng cho từng giá trị */
+        .val-hum { color: var(--primary) !important; -webkit-text-fill-color: var(--primary) !important; }
+        .val-pump { color: var(--danger); } 
+
+        /* --- CONTROL PANEL --- */
+        .control-panel {
+            background: white; padding: 30px; border-radius: 20px;
+            margin-top: 30px; box-shadow: var(--shadow);
+        }
+        .control-group { margin-bottom: 25px; }
+        .control-group h4 { margin: 0 0 15px 0; color: #636e72; }
+        
+        .btn {
+            padding: 12px 30px; margin-right: 10px; margin-bottom: 10px;
+            border: none; border-radius: 12px;
+            cursor: pointer; font-weight: 600; font-family: 'Poppins';
+            transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-auto { background: #74b9ff; color: white; }
+        .btn-manual { background: #fab1a0; color: white; }
+        .btn-off { background: #ff7675; color: white; }
+        .btn-on { background: #55efc4; color: #2d3436; }
+        .btn-ota { background: #fdcb6e; color: #2d3436; width: 100%; margin-top: 10px;}
+
+        /* --- REPORT & CONFIG --- */
+        .date-picker, .config-input {
+            padding: 12px; border: 2px solid #eee; border-radius: 10px;
+            font-family: 'Poppins'; outline: none;
+        }
+        .config-form {
+            background: white; padding: 40px; border-radius: 20px;
+            max-width: 500px; margin: 0 auto; box-shadow: var(--shadow);
+        }
+
+        /* --- ANIMATIONS & RESPONSIVE --- */
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .section { display: none; animation: fadeIn 0.4s ease-out; }
+        .section.active { display: block; }
+
+        @media (max-width: 768px) {
+            #main-app { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; padding: 15px; flex-direction: row; overflow-x: auto; box-sizing: border-box;}
+            .sidebar h2 { display: none; }
+            .menu-item { white-space: nowrap; padding: 10px 15px; font-size: 14px; }
+            .content { padding: 15px; }
+            .value { font-size: 35px; }
+        }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-box">
-            <h2>🔐 Đăng nhập</h2>
-            <input type="text" id="username" class="login-input" placeholder="admin / user">
+            <h2>🌿 Smart Garden</h2>
+            <p style="color:gray; font-size: 14px; margin-bottom: 20px;">Đăng nhập hệ thống quản lý</p>
+            <input type="text" id="username" class="login-input" placeholder="Tên đăng nhập">
             <input type="password" id="password" class="login-input" placeholder="Mật khẩu">
-            <button class="login-btn" onclick="handleLogin()">VÀO HỆ THỐNG</button>
-            <p id="login-msg" style="color: red; font-size: 12px; margin-top: 10px;"></p>
+            <button class="login-btn" onclick="handleLogin()">Đăng Nhập</button>
+            <p id="login-msg" style="color: #ff7675; font-size: 13px; margin-top: 15px;"></p>
         </div>
     </div>
 
     <div id="main-app">
         <div class="sidebar">
-            <h2>🌱 Smart Garden</h2>
+            <h2>🌱 Garden Pro</h2>
             <div class="menu-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
             <div class="menu-item" onclick="showSection('report')">📈 Báo Cáo</div>
             <div class="menu-item" onclick="showSection('config')">⚙️ Cấu Hình</div>
-            <div class="menu-item logout" onclick="logout()">Đăng Xuất</div>
+            <div class="menu-item logout" onclick="logout()">👋 Đăng Xuất</div>
         </div>
 
         <div class="content">
-            <h2 id="page-title">Dashboard</h2>
-            <p>Xin chào, <span id="user-role" style="font-weight: bold;">--</span></p>
-            <hr style="border: 0; border-top: 1px solid #ddd; margin-bottom: 20px;">
+            <div class="header-bar">
+                <h2 id="page-title">Tổng quan</h2>
+                <div class="user-badge">👤 <span id="user-role">--</span></div>
+            </div>
+
+            <div class="garden-selector">
+                <span>🏡 Đang xem dữ liệu của:</span>
+                <select id="device-select" onchange="changeDevice()">
+                    <option value="vuon1">Vườn 1 (Sân Thượng)</option>
+                    <option value="vuon2">Vườn 2 (Sân Sau)</option>
+                </select>
+            </div>
 
             <div id="dashboard" class="section active">
                 <div class="dashboard-grid">
                     <div class="card">
-                        <span class="label">ĐỘ ẨM ĐẤT</span>
-                        <div class="value" style="color: #00b894;"><span id="hum">--</span>%</div>
-                        <span id="hum-raw" style="font-size: 12px; color: grey;">(Raw: --)</span>
+                        <span class="label">💧 ĐỘ ẨM ĐẤT</span>
+                        <div class="value val-hum"><span id="hum">--</span>%</div>
+                        <span id="hum-raw" style="font-size: 12px; color: #b2bec3;">(Raw: --)</span>
                     </div>
                     <div class="card">
-                        <span class="label">MÁY BƠM</span>
-                        <div class="value" id="pump-status">--</div>
+                        <span class="label">⚙️ MÁY BƠM</span>
+                        <div class="value" id="pump-status" style="font-size: 30px;">--</div>
                     </div>
                     <div class="card">
-                        <span class="label">CHẾ ĐỘ</span>
-                        <div class="value" id="mode-status" style="color: #0984e3;">--</div>
+                        <span class="label">🧠 CHẾ ĐỘ</span>
+                        <div class="value" id="mode-status" style="color: #0984e3; font-size: 30px;">--</div>
                     </div>
                 </div>
 
                 <div class="control-panel" id="admin-controls">
-                    <h3>🕹️ Bảng Điều Khiển</h3>
-                    <p>Chế độ:</p>
-                    <button class="btn btn-auto" onclick="sendCommand('SET_MODE_AUTO')">AUTO</button>
-                    <button class="btn btn-manual" onclick="sendCommand('SET_MODE_MANUAL')">MANUAL</button>
-                    <button class="btn btn-off" onclick="sendCommand('SET_MODE_OFF')">OFF (DỪNG)</button>
-                    <hr>
-                    <p>Bơm (Chế độ Manual):</p>
-                    <button class="btn btn-on" onclick="sendCommand('PUMP_ON')">Bật Bơm</button>
-                    <button class="btn btn-off" style="background:#e74c3c" onclick="sendCommand('PUMP_OFF')">Tắt Bơm</button>
+                    <div class="control-group">
+                        <h4>🕹️ Chọn Chế độ hoạt động</h4>
+                        <button class="btn btn-auto" onclick="sendCommand('SET_MODE_AUTO')">Tự động (AUTO)</button>
+                        <button class="btn btn-manual" onclick="sendCommand('SET_MODE_MANUAL')">Thủ công (MANUAL)</button>
+                        <button class="btn btn-off" onclick="sendCommand('SET_MODE_OFF')">Dừng tất cả (OFF)</button>
+                    </div>
+                    <hr style="border:0; border-top:1px dashed #ddd; margin: 20px 0;">
+                    <div class="control-group">
+                        <h4>💦 Điều khiển Bơm (Chế độ Manual)</h4>
+                        <button class="btn btn-on" onclick="sendCommand('PUMP_ON')">Mở Bơm</button>
+                        <button class="btn btn-off" onclick="sendCommand('PUMP_OFF')">Tắt Bơm</button>
+                    </div>
+                    <hr style="border:0; border-top:1px dashed #ddd; margin: 20px 0;">
+                    <div class="control-group">
+                        <h4>🔄 Hệ thống</h4>
+                        <button class="btn btn-ota" onclick="sendCommand('CMD:UPDATE_SYSTEM')">Cập nhật phần mềm từ xa (OTA)</button>
+                    </div>
                 </div>
-                <div id="guest-msg" style="display:none; color: red; margin-top:20px;">Bạn là User, chỉ được xem thông tin.</div>
+                <div id="guest-msg" style="display:none; text-align:center; color: #ff7675; margin-top:20px; font-weight:bold;">⚠️ Bạn đang đăng nhập quyền Khách, chỉ được xem thông tin.</div>
             </div>
 
             <div id="report" class="section">
-                <h3>Thống kê lịch sử</h3>
-                
-                <label>Chọn ngày xem: </label>
-                <input type="date" id="report-date" class="date-picker" onchange="loadReport()">
-                <button class="btn btn-manual" style="padding: 10px;" onclick="loadReport()">Xem</button>
+                <div class="card" style="margin-bottom: 20px; text-align: left;">
+                    <h3>📅 Thống kê lịch sử</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label>Chọn ngày: </label>
+                        <input type="date" id="report-date" class="date-picker" onchange="loadReport()">
+                        <button class="btn btn-manual" style="margin:0;" onclick="loadReport()">Xem báo cáo</button>
+                    </div>
+                </div>
 
                 <div class="dashboard-grid">
                     <div class="card">
@@ -112,37 +275,51 @@
                     </div>
                 </div>
                 <br>
-                <div class="card" style="width: 100%;">
-                    <h3>Biểu đồ độ ẩm (Theo thời gian)</h3>
+                <div class="card">
                     <canvas id="myChart"></canvas>
                 </div>
             </div>
 
             <div id="config" class="section">
                 <div class="config-form">
-                    <h3>⚙️ Đổi WiFi cho Thiết bị</h3>
-                    <label>SSID (Tên WiFi):</label>
-                    <input type="text" id="conf-ssid" class="login-input">
-                    <label>Password:</label>
-                    <input type="password" id="conf-pass" class="login-input">
-                    <button class="btn btn-on" style="width:100%; margin-top:10px;" onclick="saveConfig()">Gửi Cấu Hình</button>
+                    <h3 style="text-align: center; color: var(--primary);">📡 Cấu hình WiFi</h3>
+                    <p style="text-align: center; color: gray; font-size: 14px;">Gửi thông tin WiFi mới cho: <b id="conf-target" style="color:var(--secondary)">--</b></p>
+                    
+                    <label style="font-weight: 600; display: block; margin-top: 15px;">Tên WiFi (SSID)</label>
+                    <input type="text" id="conf-ssid" class="login-input" placeholder="Nhập tên WiFi...">
+                    
+                    <label style="font-weight: 600; display: block; margin-top: 15px;">Mật khẩu</label>
+                    <input type="password" id="conf-pass" class="login-input" placeholder="Nhập mật khẩu...">
+                    
+                    <button class="login-btn" onclick="saveConfig()">Gửi Cấu Hình Ngay</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const IP = "http://localhost:3000"; 
+        const IP = ""; // Đã để rỗng chuẩn Cloud
         let currentUser = null;
         let chartInstance = null;
-
         const SENSOR_DRY = 1024; 
         const SENSOR_WET = 400;  
 
+        function getCurrentDevice() {
+            return document.getElementById('device-select').value;
+        }
+
+        function changeDevice() {
+            const dev = getCurrentDevice();
+            document.getElementById('conf-target').innerText = dev;
+            updateDashboard(); 
+            if(document.getElementById('report').classList.contains('active')) {
+                loadReport();
+            }
+        }
+
         function convertHum(rawVal) {
             let percent = ((SENSOR_DRY - rawVal) / (SENSOR_DRY - SENSOR_WET)) * 100;
-            if (percent < 0) percent = 0;
-            if (percent > 100) percent = 100;
+            if (percent < 0) percent = 0; if (percent > 100) percent = 100;
             return Math.round(percent);
         }
 
@@ -150,9 +327,9 @@
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
             try {
+                document.getElementById('login-msg').innerText = "Đang kết nối...";
                 const res = await fetch(IP + '/api/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ username: u, password: p })
                 });
                 const data = await res.json();
@@ -161,17 +338,16 @@
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('main-app').style.display = 'flex';
                     document.getElementById('user-role').innerText = data.name;
-                    if (data.role === 'user') {
-                        document.getElementById('admin-controls').style.display = 'none';
-                        document.getElementById('guest-msg').style.display = 'block';
-                    }
-                    
+                    if (data.role === 'user') document.getElementById('admin-controls').style.display = 'none';
+                    else document.getElementById('guest-msg').style.display = 'none';
+
                     document.getElementById('report-date').valueAsDate = new Date();
+                    document.getElementById('conf-target').innerText = getCurrentDevice();
                     startDashboard();
                 } else {
                     document.getElementById('login-msg').innerText = data.message;
                 }
-            } catch (e) { alert("Lỗi kết nối Server!"); }
+            } catch (e) { document.getElementById('login-msg').innerText = "Lỗi kết nối Server!"; }
         }
 
         function logout() { location.reload(); }
@@ -181,19 +357,27 @@
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             event.target.classList.add('active');
+            document.getElementById('page-title').innerText = event.target.innerText.replace(/^[^\w\s]+/, ''); // Lấy tên mục
             if (id === 'report') loadReport();
         }
 
         async function updateDashboard() {
             try {
-                let res = await fetch(IP + "/api/web/current");
+                const deviceId = getCurrentDevice();
+                let res = await fetch(IP + `/api/web/current?deviceId=${deviceId}`);
                 let data = await res.json();
+                
                 document.getElementById("hum").innerText = convertHum(data.humidity);
                 document.getElementById("hum-raw").innerText = "(Raw: " + data.humidity + ")";
-                document.getElementById("pump-status").innerText = data.pumpState == 1 ? "ĐANG BẬT" : "ĐANG TẮT";
+                
+                // Cập nhật trạng thái màu sắc
+                const pStt = document.getElementById("pump-status");
+                if (data.pumpState == 1) { pStt.innerText = "ĐANG CHẠY 🟢"; pStt.style.color = "#00b894"; }
+                else { pStt.innerText = "ĐANG TẮT 🔴"; pStt.style.color = "#d63031"; }
+                
                 let mStt = "OFF";
-                if(data.mode == 1) mStt = "AUTO";
-                if(data.mode == 2) mStt = "MANUAL";
+                if(data.mode == 1) mStt = "TỰ ĐỘNG (AUTO)";
+                if(data.mode == 2) mStt = "THỦ CÔNG";
                 document.getElementById("mode-status").innerText = mStt;
             } catch(e) {}
         }
@@ -205,18 +389,19 @@
 
         async function sendCommand(cmd) {
             if (currentUser.role !== 'admin') return alert("Không có quyền!");
+            const deviceId = getCurrentDevice();
             await fetch(IP + "/api/web/command", {
                 method: "POST", headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({cmd: cmd})
+                body: JSON.stringify({ cmd: cmd, deviceId: deviceId })
             });
-            alert("Đã gửi: " + cmd);
+            alert(`✅ Đã gửi lệnh [${cmd}] tới [${deviceId}]`);
         }
 
-        // --- ĐÃ SỬA PHẦN NÀY ĐỂ TRỤC Y LUÔN LÀ 0-100 ---
         async function loadReport() {
             try {
                 const dateVal = document.getElementById('report-date').value;
-                let res = await fetch(IP + `/api/report/stats?date=${dateVal}`);
+                const deviceId = getCurrentDevice();
+                let res = await fetch(IP + `/api/report/stats?date=${dateVal}&deviceId=${deviceId}`);
                 let data = await res.json();
 
                 document.getElementById('rep-pump').innerText = data.pumpCount;
@@ -230,26 +415,17 @@
                     data: {
                         labels: data.chartData.map(d => new Date(d.timestamp).toLocaleTimeString()),
                         datasets: [{
-                            label: 'Độ ẩm (%)',
+                            label: `Độ ẩm ${deviceId} (%)`,
                             data: data.chartData.map(d => convertHum(d.humidity)),
                             borderColor: '#00b894',
-                            backgroundColor: 'rgba(0, 184, 148, 0.1)',
-                            fill: true,
-                            tension: 0.3
+                            backgroundColor: 'rgba(0, 184, 148, 0.2)',
+                            fill: true, tension: 0.4, pointRadius: 2
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true, // Bắt đầu từ 0
-                                max: 100,          // Kết thúc ở 100
-                                title: {
-                                    display: true,
-                                    text: 'Độ ẩm (%)'
-                                }
-                            }
-                        }
+                    options: { 
+                        responsive: true, 
+                        plugins: { legend: { position: 'top' } },
+                        scales: { y: { beginAtZero: true, max: 100 } } 
                     }
                 });
             } catch(e) { console.log(e); }
@@ -259,8 +435,8 @@
             if (currentUser.role !== 'admin') return alert("Chỉ Admin mới được sửa!");
             const s = document.getElementById('conf-ssid').value;
             const p = document.getElementById('conf-pass').value;
+            if(!s) return alert("Chưa nhập tên WiFi!");
             sendCommand(`CONF_WIFI:${s},${p}`);
-            alert("Đã gửi cấu hình xuống ESP!");
         }
     </script>
 </body>
