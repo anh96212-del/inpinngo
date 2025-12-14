@@ -1,269 +1,268 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Garden Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* CSS Giữ nguyên */
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f0f2f5; }
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .login-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .login-btn { width: 100%; padding: 10px; background: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;}
-        
-        #main-app { display: none; display: flex; height: 100vh; }
-        .sidebar { width: 250px; background: #2d3436; color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { margin-bottom: 30px; text-align: center; color: #00b894; }
-        .menu-item { padding: 15px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
-        .menu-item:hover, .menu-item.active { background: #636e72; }
-        .logout { margin-top: auto; background: #d63031; text-align: center; }
-        .content { flex: 1; padding: 30px; overflow-y: auto; }
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.5s; }
-        .dashboard-grid { display: flex; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; padding: 20px; border-radius: 10px; flex: 1; min-width: 200px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        .value { font-size: 40px; font-weight: bold; color: #2d3436; }
-        .label { color: #636e72; font-size: 14px; margin-bottom: 10px; display: block;}
-        .control-panel { margin-top: 30px; background: white; padding: 20px; border-radius: 10px; }
-        .btn { padding: 12px 25px; margin-right: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
-        .btn:disabled { background-color: #ccc !important; cursor: not-allowed; }
-        .btn-on { background: #00b894; } .btn-off { background: #d63031; } .btn-auto { background: #0984e3; } .btn-manual { background: #e17055; }
-        .config-form { max-width: 400px; background: white; padding: 30px; border-radius: 10px; }
-        .date-picker { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 20px; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Garden Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* CSS Giữ nguyên */
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f0f2f5; }
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: white; padding: 40px; border-radius: 10px; width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .login-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .login-btn { width: 100%; padding: 10px; background: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;}
+        
+        #main-app { display: none; display: flex; height: 100vh; }
+        .sidebar { width: 250px; background: #2d3436; color: white; padding: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { margin-bottom: 30px; text-align: center; color: #00b894; }
+        .menu-item { padding: 15px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
+        .menu-item:hover, .menu-item.active { background: #636e72; }
+        .logout { margin-top: auto; background: #d63031; text-align: center; }
+        .content { flex: 1; padding: 30px; overflow-y: auto; }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.5s; }
+        .dashboard-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: white; padding: 20px; border-radius: 10px; flex: 1; min-width: 200px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .value { font-size: 40px; font-weight: bold; color: #2d3436; }
+        .label { color: #636e72; font-size: 14px; margin-bottom: 10px; display: block;}
+        .control-panel { margin-top: 30px; background: white; padding: 20px; border-radius: 10px; }
+        .btn { padding: 12px 25px; margin-right: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
+        .btn:disabled { background-color: #ccc !important; cursor: not-allowed; }
+        .btn-on { background: #00b894; } .btn-off { background: #d63031; } .btn-auto { background: #0984e3; } .btn-manual { background: #e17055; }
+        .config-form { max-width: 400px; background: white; padding: 30px; border-radius: 10px; }
+        .date-picker { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 20px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h2>🔐 Đăng nhập</h2>
-            <input type="text" id="username" class="login-input" placeholder="admin / user">
-            <input type="password" id="password" class="login-input" placeholder="Mật khẩu">
-            <button class="login-btn" onclick="handleLogin()">VÀO HỆ THỐNG</button>
-            <p id="login-msg" style="color: red; font-size: 12px; margin-top: 10px;"></p>
-        </div>
-    </div>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>🔐 Đăng nhập</h2>
+            <input type="text" id="username" class="login-input" placeholder="admin / user">
+            <input type="password" id="password" class="login-input" placeholder="Mật khẩu">
+            <button class="login-btn" onclick="handleLogin()">VÀO HỆ THỐNG</button>
+            <p id="login-msg" style="color: red; font-size: 12px; margin-top: 10px;"></p>
+        </div>
+    </div>
 
-    <div id="main-app">
-        <div class="sidebar">
-            <h2>🌱 Smart Garden</h2>
-            <div class="menu-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
-            <div class="menu-item" onclick="showSection('report')">📈 Báo Cáo</div>
-            <div class="menu-item" onclick="showSection('config')">⚙️ Cấu Hình</div>
-            <div class="menu-item logout" onclick="logout()">Đăng Xuất</div>
-        </div>
+    <div id="main-app">
+        <div class="sidebar">
+            <h2>🌱 Smart Garden</h2>
+            <div class="menu-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
+            <div class="menu-item" onclick="showSection('report')">📈 Báo Cáo</div>
+            <div class="menu-item" onclick="showSection('config')">⚙️ Cấu Hình</div>
+            <div class="menu-item logout" onclick="logout()">Đăng Xuất</div>
+        </div>
 
-        <div class="content">
-            <h2 id="page-title">Dashboard</h2>
-            <p>Xin chào, <span id="user-role" style="font-weight: bold;">--</span></p>
-            <hr style="border: 0; border-top: 1px solid #ddd; margin-bottom: 20px;">
+        <div class="content">
+            <h2 id="page-title">Dashboard</h2>
+            <p>Xin chào, <span id="user-role" style="font-weight: bold;">--</span></p>
+            <hr style="border: 0; border-top: 1px solid #ddd; margin-bottom: 20px;">
 
-            <div id="dashboard" class="section active">
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <span class="label">ĐỘ ẨM ĐẤT</span>
-                        <div class="value" style="color: #00b894;"><span id="hum">--</span>%</div>
-                        <span id="hum-raw" style="font-size: 12px; color: grey;">(Raw: --)</span>
-                    </div>
-                    <div class="card">
-                        <span class="label">MÁY BƠM</span>
-                        <div class="value" id="pump-status">--</div>
-                    </div>
-                    <div class="card">
-                        <span class="label">CHẾ ĐỘ</span>
-                        <div class="value" id="mode-status" style="color: #0984e3;">--</div>
-                    </div>
-                </div>
+            <div id="dashboard" class="section active">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <span class="label">ĐỘ ẨM ĐẤT</span>
+                        <div class="value" style="color: #00b894;"><span id="hum">--</span>%</div>
+                        <span id="hum-raw" style="font-size: 12px; color: grey;">(Raw: --)</span>
+                    </div>
+                    <div class="card">
+                        <span class="label">MÁY BƠM</span>
+                        <div class="value" id="pump-status">--</div>
+                    </div>
+                    <div class="card">
+                        <span class="label">CHẾ ĐỘ</span>
+                        <div class="value" id="mode-status" style="color: #0984e3;">--</div>
+                    </div>
+                </div>
 
-                <div class="control-panel" id="admin-controls">
-                    <h3>🕹️ Bảng Điều Khiển</h3>
-                    <p>Chế độ:</p>
-                    <button class="btn btn-auto" onclick="sendCommand('SET_MODE_AUTO')">AUTO</button>
-                    <button class="btn btn-manual" onclick="sendCommand('SET_MODE_MANUAL')">MANUAL</button>
-                    <button class="btn btn-off" onclick="sendCommand('SET_MODE_OFF')">OFF (DỪNG)</button>
-                    <hr>
-                    <p>Bơm (Chế độ Manual):</p>
-                    <button class="btn btn-on" onclick="sendCommand('PUMP_ON')">Bật Bơm</button>
-                    <button class="btn btn-off" style="background:#e74c3c" onclick="sendCommand('PUMP_OFF')">Tắt Bơm</button>
-                </div>
-                <div id="guest-msg" style="display:none; color: red; margin-top:20px;">Bạn là User, chỉ được xem thông tin.</div>
-            </div>
+                <div class="control-panel" id="admin-controls">
+                    <h3>🕹️ Bảng Điều Khiển</h3>
+                    <p>Chế độ:</p>
+                    <button class="btn btn-auto" onclick="sendCommand('SET_MODE_AUTO')">AUTO</button>
+                    <button class="btn btn-manual" onclick="sendCommand('SET_MODE_MANUAL')">MANUAL</button>
+                    <button class="btn btn-off" onclick="sendCommand('SET_MODE_OFF')">OFF (DỪNG)</button>
+                    <hr>
+                    <p>Bơm (Chế độ Manual):</p>
+                    <button class="btn btn-on" onclick="sendCommand('PUMP_ON')">Bật Bơm</button>
+                    <button class="btn btn-off" style="background:#e74c3c" onclick="sendCommand('PUMP_OFF')">Tắt Bơm</button>
+                </div>
+                <div id="guest-msg" style="display:none; color: red; margin-top:20px;">Bạn là User, chỉ được xem thông tin.</div>
+            </div>
 
-            <div id="report" class="section">
-                <h3>Thống kê lịch sử</h3>
-                
-                <label>Chọn ngày xem: </label>
-                <input type="date" id="report-date" class="date-picker" onchange="loadReport()">
-                <button class="btn btn-manual" style="padding: 10px;" onclick="loadReport()">Xem</button>
+            <div id="report" class="section">
+                <h3>Thống kê lịch sử</h3>
+                
+                <label>Chọn ngày xem: </label>
+                <input type="date" id="report-date" class="date-picker" onchange="loadReport()">
+                <button class="btn btn-manual" style="padding: 10px;" onclick="loadReport()">Xem</button>
 
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <span class="label">Số lần bật bơm</span>
-                        <div class="value" id="rep-pump">0</div>
-                        <span>Lần</span>
-                    </div>
-                    <div class="card">
-                        <span class="label">Độ ẩm trung bình</span>
-                        <div class="value" id="rep-hum">0</div>
-                        <span>%</span>
-                    </div>
-                </div>
-                <br>
-                <div class="card" style="width: 100%;">
-                    <h3>Biểu đồ độ ẩm (Theo thời gian)</h3>
-                    <canvas id="myChart"></canvas>
-                </div>
-            </div>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <span class="label">Số lần bật bơm</span>
+                        <div class="value" id="rep-pump">0</div>
+                        <span>Lần</span>
+                    </div>
+                    <div class="card">
+                        <span class="label">Độ ẩm trung bình</span>
+                        <div class="value" id="rep-hum">0</div>
+                        <span>%</span>
+                    </div>
+                </div>
+                <br>
+                <div class="card" style="width: 100%;">
+                    <h3>Biểu đồ độ ẩm (Theo thời gian)</h3>
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
 
-            <div id="config" class="section">
-                <div class="config-form">
-                    <h3>⚙️ Đổi WiFi cho Thiết bị</h3>
-                    <label>SSID (Tên WiFi):</label>
-                    <input type="text" id="conf-ssid" class="login-input">
-                    <label>Password:</label>
-                    <input type="password" id="conf-pass" class="login-input">
-                    <button class="btn btn-on" style="width:100%; margin-top:10px;" onclick="saveConfig()">Gửi Cấu Hình</button>
-                </div>
-            </div>
-        </div>
-    </div>
+            <div id="config" class="section">
+                <div class="config-form">
+                    <h3>⚙️ Đổi WiFi cho Thiết bị</h3>
+                    <label>SSID (Tên WiFi):</label>
+                    <input type="text" id="conf-ssid" class="login-input">
+                    <label>Password:</label>
+                    <input type="password" id="conf-pass" class="login-input">
+                    <button class="btn btn-on" style="width:100%; margin-top:10px;" onclick="saveConfig()">Gửi Cấu Hình</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        const IP = ""; 
-        let currentUser = null;
-        let chartInstance = null;
+    <script>
+        const IP = ""; 
+        let currentUser = null;
+        let chartInstance = null;
 
-        const SENSOR_DRY = 1024; 
-        const SENSOR_WET = 400;  
+        const SENSOR_DRY = 1024; 
+        const SENSOR_WET = 400;  
 
-        function convertHum(rawVal) {
-            let percent = ((SENSOR_DRY - rawVal) / (SENSOR_DRY - SENSOR_WET)) * 100;
-            if (percent < 0) percent = 0;
-            if (percent > 100) percent = 100;
-            return Math.round(percent);
-        }
+        function convertHum(rawVal) {
+            let percent = ((SENSOR_DRY - rawVal) / (SENSOR_DRY - SENSOR_WET)) * 100;
+            if (percent < 0) percent = 0;
+            if (percent > 100) percent = 100;
+            return Math.round(percent);
+        }
 
-        async function handleLogin() {
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            try {
-                const res = await fetch(IP + '/api/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ username: u, password: p })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    currentUser = data;
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('main-app').style.display = 'flex';
-                    document.getElementById('user-role').innerText = data.name;
-                    if (data.role === 'user') {
-                        document.getElementById('admin-controls').style.display = 'none';
-                        document.getElementById('guest-msg').style.display = 'block';
-                    }
-                    
-                    document.getElementById('report-date').valueAsDate = new Date();
-                    startDashboard();
-                } else {
-                    document.getElementById('login-msg').innerText = data.message;
-                }
-            } catch (e) { alert("Lỗi kết nối Server!"); }
-        }
+        async function handleLogin() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            try {
+                const res = await fetch(IP + '/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentUser = data;
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('main-app').style.display = 'flex';
+                    document.getElementById('user-role').innerText = data.name;
+                    if (data.role === 'user') {
+                        document.getElementById('admin-controls').style.display = 'none';
+                        document.getElementById('guest-msg').style.display = 'block';
+                    }
+                    
+                    document.getElementById('report-date').valueAsDate = new Date();
+                    startDashboard();
+                } else {
+                    document.getElementById('login-msg').innerText = data.message;
+                }
+            } catch (e) { alert("Lỗi kết nối Server!"); }
+        }
 
-        function logout() { location.reload(); }
+        function logout() { location.reload(); }
 
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
-            if (id === 'report') loadReport();
-        }
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+            if (id === 'report') loadReport();
+        }
 
-        async function updateDashboard() {
-            try {
-                let res = await fetch(IP + "/api/web/current");
-                let data = await res.json();
-                document.getElementById("hum").innerText = convertHum(data.humidity);
-                document.getElementById("hum-raw").innerText = "(Raw: " + data.humidity + ")";
-                document.getElementById("pump-status").innerText = data.pumpState == 1 ? "ĐANG BẬT" : "ĐANG TẮT";
-                let mStt = "OFF";
-                if(data.mode == 1) mStt = "AUTO";
-                if(data.mode == 2) mStt = "MANUAL";
-                document.getElementById("mode-status").innerText = mStt;
-            } catch(e) {}
-        }
+        async function updateDashboard() {
+            try {
+                let res = await fetch(IP + "/api/web/current");
+                let data = await res.json();
+                document.getElementById("hum").innerText = convertHum(data.humidity);
+                document.getElementById("hum-raw").innerText = "(Raw: " + data.humidity + ")";
+                document.getElementById("pump-status").innerText = data.pumpState == 1 ? "ĐANG BẬT" : "ĐANG TẮT";
+                let mStt = "OFF";
+                if(data.mode == 1) mStt = "AUTO";
+                if(data.mode == 2) mStt = "MANUAL";
+                document.getElementById("mode-status").innerText = mStt;
+            } catch(e) {}
+        }
 
-        function startDashboard() {
-            updateDashboard();
-            setInterval(updateDashboard, 2000);
-        }
+        function startDashboard() {
+            updateDashboard();
+            setInterval(updateDashboard, 2000);
+        }
 
-        async function sendCommand(cmd) {
-            if (currentUser.role !== 'admin') return alert("Không có quyền!");
-            await fetch(IP + "/api/web/command", {
-                method: "POST", headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({cmd: cmd})
-            });
-            alert("Đã gửi: " + cmd);
-        }
+        async function sendCommand(cmd) {
+            if (currentUser.role !== 'admin') return alert("Không có quyền!");
+            await fetch(IP + "/api/web/command", {
+                method: "POST", headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({cmd: cmd})
+            });
+            alert("Đã gửi: " + cmd);
+        }
 
-        // --- ĐÃ SỬA PHẦN NÀY ĐỂ TRỤC Y LUÔN LÀ 0-100 ---
-        async function loadReport() {
-            try {
-                const dateVal = document.getElementById('report-date').value;
-                let res = await fetch(IP + `/api/report/stats?date=${dateVal}`);
-                let data = await res.json();
+        // --- ĐÃ SỬA PHẦN NÀY ĐỂ TRỤC Y LUÔN LÀ 0-100 ---
+        async function loadReport() {
+            try {
+                const dateVal = document.getElementById('report-date').value;
+                let res = await fetch(IP + `/api/report/stats?date=${dateVal}`);
+                let data = await res.json();
 
-                document.getElementById('rep-pump').innerText = data.pumpCount;
-                document.getElementById('rep-hum').innerText = convertHum(data.avgHumidity);
+                document.getElementById('rep-pump').innerText = data.pumpCount;
+                document.getElementById('rep-hum').innerText = convertHum(data.avgHumidity);
 
-                const ctx = document.getElementById('myChart').getContext('2d');
-                if (chartInstance) chartInstance.destroy();
-                
-                chartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.chartData.map(d => new Date(d.timestamp).toLocaleTimeString()),
-                        datasets: [{
-                            label: 'Độ ẩm (%)',
-                            data: data.chartData.map(d => convertHum(d.humidity)),
-                            borderColor: '#00b894',
-                            backgroundColor: 'rgba(0, 184, 148, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true, // Bắt đầu từ 0
-                                max: 100,          // Kết thúc ở 100
-                                title: {
-                                    display: true,
-                                    text: 'Độ ẩm (%)'
-                                }
-                            }
-                        }
-                    }
-                });
-            } catch(e) { console.log(e); }
-        }
+                const ctx = document.getElementById('myChart').getContext('2d');
+                if (chartInstance) chartInstance.destroy();
+                
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.chartData.map(d => new Date(d.timestamp).toLocaleTimeString()),
+                        datasets: [{
+                            label: 'Độ ẩm (%)',
+                            data: data.chartData.map(d => convertHum(d.humidity)),
+                            borderColor: '#00b894',
+                            backgroundColor: 'rgba(0, 184, 148, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true, // Bắt đầu từ 0
+                                max: 100,          // Kết thúc ở 100
+                                title: {
+                                    display: true,
+                                    text: 'Độ ẩm (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch(e) { console.log(e); }
+        }
 
-        function saveConfig() {
-            if (currentUser.role !== 'admin') return alert("Chỉ Admin mới được sửa!");
-            const s = document.getElementById('conf-ssid').value;
-            const p = document.getElementById('conf-pass').value;
-            sendCommand(`CONF_WIFI:${s},${p}`);
-            alert("Đã gửi cấu hình xuống ESP!");
-        }
-    </script>
+        function saveConfig() {
+            if (currentUser.role !== 'admin') return alert("Chỉ Admin mới được sửa!");
+            const s = document.getElementById('conf-ssid').value;
+            const p = document.getElementById('conf-pass').value;
+            sendCommand(`CONF_WIFI:${s},${p}`);
+            alert("Đã gửi cấu hình xuống ESP!");
+        }
+    </script>
 </body>
 
-</html> 
-
+</html>
