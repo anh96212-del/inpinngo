@@ -52,6 +52,66 @@ let lastSaveTime = 0;
 let lastPumpState = -1;    
 let ramData = null;         
 
+// === [MỚI] CẤU HÌNH THÔNG MINH ===
+// Mặc định ngưỡng là 600. (Lưu ý: Cảm biến điện dung thường là Cao=Khô, Thấp=Ướt)
+// Quy tắc: Nếu độ ẩm > threshold => Đất khô => Bật bơm
+let smartConfig = {
+    threshold: 600,           // Ngưỡng kích hoạt tưới (Mặc định)
+    status: "Chưa phân tích", // Trạng thái AI
+    lastRun: null             // Thời gian phân tích cuối
+};
+
+// === [MỚI] HÀM PHÂN TÍCH DỮ LIỆU QUÁ KHỨ ===
+// === HÀM PHÂN TÍCH DỮ LIỆU LỚN (Thay thế hàm cũ trong server.js) ===
+async function analyzeHistory() {
+    console.log("🧠 [AI] Đang phân tích xu hướng 7 ngày qua...");
+    
+    // Mốc thời gian: 7 ngày trước
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    // Tính trung bình độ ẩm của 7 ngày qua (Trend Analysis)
+    const stats = await DeviceData.aggregate([
+        { $match: { timestamp: { $gte: sevenDaysAgo } } },
+        { 
+            $group: { 
+                _id: null, 
+                avgHum: { $avg: "$humidity" },
+                totalPump: { $sum: "$pumpState" } // Đếm tổng số lần bơm
+            } 
+        }
+    ]);
+
+    if (stats.length > 0) {
+        const avgHum = Math.round(stats[0].avgHum);
+        const pumpCount = stats[0].totalPump;
+
+        console.log(`📊 [AI REPORT] 7 Ngày qua: Ẩm TB=${avgHum}, Bơm=${pumpCount} lần`);
+
+        // --- LOGIC QUYẾT ĐỊNH DỰA TRÊN DỮ LIỆU TUẦN ---
+        
+        // 1. Nếu trung bình tuần < 450 (Đợt nắng nóng kéo dài)
+        if (avgHum < 450) {
+            smartConfig.threshold = 700; 
+            smartConfig.status = `🔥 Đợt nắng nóng kéo dài (TB tuần:${avgHum}) -> Tăng ngưỡng lên 700`;
+        } 
+        // 2. Nếu trung bình tuần > 750 (Mùa mưa/Nồm)
+        else if (avgHum > 750) {
+            smartConfig.threshold = 900; // Hầu như không cần tưới
+            smartConfig.status = `🌧️ Mùa mưa ẩm (TB tuần:${avgHum}) -> Giảm tưới tối đa`;
+        } 
+        // 3. Bình thường
+        else {
+            smartConfig.threshold = 600;
+            smartConfig.status = `✅ Thời tiết ổn định (TB tuần:${avgHum})`;
+        }
+        smartConfig.lastRun = new Date();
+    } else {
+        console.log("⚠️ [AI] Chưa đủ dữ liệu 7 ngày để phân tích.");
+        smartConfig.status = "Đang thu thập dữ liệu...";
+    }
+}
+
 // --- 3. XỬ LÝ DỮ LIỆU TỪ ESP ---
 client.on('message', async (topic, message) => {
     if (topic === 'tuoicay/data') {
@@ -59,14 +119,31 @@ client.on('message', async (topic, message) => {
             const dataStr = message.toString();
             const data = JSON.parse(dataStr);
             
+            // Cập nhật RAM
             ramData = { ...data, timestamp: new Date() };
+
+            // === [MỚI] LOGIC ĐIỀU KHIỂN TỰ ĐỘNG THÔNG MINH ===
+            // Server giành quyền điều khiển khi ở chế độ AUTO
+            if (data.mode === 1) { 
+                // Điều kiện: Đất Khô (> Ngưỡng) VÀ Bơm đang tắt
+                if (data.humidity > smartConfig.threshold && data.pumpState === 0) {
+                    console.log(`🤖 [AUTO] Đất khô (${data.humidity} > ${smartConfig.threshold}) -> GỬI LỆNH BẬT BƠM`);
+                    client.publish('tuoicay/cmd', 'CMD:PUMP_ON');
+                }
+                // Điều kiện: Đất Đủ ẩm (< Ngưỡng) VÀ Bơm đang bật
+                else if (data.humidity <= smartConfig.threshold && data.pumpState === 1) {
+                    console.log(`🤖 [AUTO] Đủ ẩm (${data.humidity} <= ${smartConfig.threshold}) -> GỬI LỆNH TẮT BƠM`);
+                    client.publish('tuoicay/cmd', 'CMD:PUMP_OFF');
+                }
+            }
+            // ================================================
 
             const now = Date.now();
             const isPumpChanged = (data.pumpState !== lastPumpState);
-            const isTimeUp = (now - lastSaveTime > 300000); 
+            const isTimeUp = (now - lastSaveTime > 300000); // 5 phút
 
             if (isPumpChanged || isTimeUp) {
-                console.log(`💾 Đang lưu DB - Data: ${dataStr}`);
+                console.log(`💾 Đang lưu DB - Hum:${data.humidity} Mode:${data.mode} Pump:${data.pumpState}`);
                 const newData = new DeviceData({ 
                     humidity: data.humidity, 
                     mode: data.mode, 
@@ -91,7 +168,6 @@ app.get('/', (req, res) => {
 
 // --- 5. CÁC API ---
 
-// API lấy dữ liệu hiện tại
 app.get('/api/web/current', async (req, res) => {
     if (ramData) res.json(ramData); 
     else {
@@ -100,7 +176,6 @@ app.get('/api/web/current', async (req, res) => {
     }
 });
 
-// API Gửi lệnh điều khiển (ĐÃ THÊM LẠI - QUAN TRỌNG)
 app.post('/api/web/command', (req, res) => {
     const { cmd } = req.body;
     console.log("📤 Web gửi lệnh:", cmd);
@@ -108,11 +183,9 @@ app.post('/api/web/command', (req, res) => {
     res.json({ status: "Sent via MQTT" });
 });
 
-// API Đăng nhập (Đã thêm log debug)
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        console.log("Login request:", username);
         const user = await User.findOne({ username });
         if (user && user.password === password) {
             res.json({ success: true, role: user.role, name: user.name });
@@ -120,47 +193,62 @@ app.post('/api/login', async (req, res) => {
             res.json({ success: false, message: "Sai thông tin!" });
         }
     } catch (e) {
-        console.log("Lỗi Login:", e);
         res.status(500).json({ success: false, message: "Lỗi Server" });
     }
 });
 
-// API Báo cáo (CHỈ GIỮ LẠI BẢN FIX MÚI GIỜ VN)
+// === [MỚI] API TEST THÔNG MINH (DÙNG ĐỂ DEMO) ===
+// Gọi link này để ép hệ thống phân tích lại ngay lập tức
+app.get('/api/test-smart', async (req, res) => {
+    await analyzeHistory(); // Chạy phân tích
+    res.json({
+        message: "Đã chạy phân tích dữ liệu quá khứ!",
+        config: smartConfig // Trả về cấu hình mới để xem
+    });
+});
+
+// [CẬP NHẬT] API Báo cáo theo khoảng thời gian
 app.get('/api/report/stats', async (req, res) => {
     try {
-        let dateStr = req.query.date;
+        let { start, end } = req.query;
         
-        // Nếu không gửi ngày lên, mặc định lấy ngày hiện tại ở VN
-        if (!dateStr) {
+        // 1. Xác định thời gian bắt đầu và kết thúc
+        let startDate, endDate;
+
+        if (!start || !end) {
+            // Nếu không gửi ngày lên, mặc định lấy ngày hiện tại (VN)
             const now = new Date();
             const vnTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
-            dateStr = vnTime.toISOString().split('T')[0];
+            const todayStr = vnTime.toISOString().split('T')[0];
+            startDate = new Date(`${todayStr}T00:00:00+07:00`);
+            endDate = new Date(`${todayStr}T23:59:59+07:00`);
+        } else {
+            // Nếu có gửi ngày: Từ 00:00 ngày start -> 23:59 ngày end
+            startDate = new Date(`${start}T00:00:00+07:00`);
+            endDate = new Date(`${end}T23:59:59+07:00`);
         }
 
-        // ÉP MÚI GIỜ +07:00
-        const startDate = new Date(`${dateStr}T00:00:00+07:00`);
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 1);
+        console.log(`📊 Report từ: ${startDate.toISOString()} đến ${endDate.toISOString()}`);
 
-        console.log(`Report từ: ${startDate.toISOString()} đến ${endDate.toISOString()}`);
+        // 2. Truy vấn Database theo khoảng thời gian
+        const query = { timestamp: { $gte: startDate, $lte: endDate } };
 
         const pumpCount = await DeviceData.countDocuments({ 
-            timestamp: { $gte: startDate, $lt: endDate }, 
+            ...query, 
             pumpState: 1 
         });
 
         const avgHumData = await DeviceData.aggregate([
-            { $match: { timestamp: { $gte: startDate, $lt: endDate } } },
+            { $match: query },
             { $group: { _id: null, avgHum: { $avg: "$humidity" } } }
         ]);
         const avgHum = avgHumData.length > 0 ? Math.round(avgHumData[0].avgHum) : 0;
         
-        const chartData = await DeviceData.find({ 
-            timestamp: { $gte: startDate, $lt: endDate } 
-        }).sort({ timestamp: 1 });
+        const chartData = await DeviceData.find(query).sort({ timestamp: 1 });
 
         res.json({ 
-            date: dateStr, 
+            start: start || startDate.toISOString().split('T')[0],
+            end: end || endDate.toISOString().split('T')[0],
             pumpCount, 
             avgHumidity: avgHum, 
             chartData 
@@ -173,4 +261,4 @@ app.get('/api/report/stats', async (req, res) => {
 
 // --- 6. CHẠY SERVER ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server đang chạy tại port ${PORT}`));
+app.listen(PORT, () => console.log(`Server Smart đang chạy tại port ${PORT}`));
