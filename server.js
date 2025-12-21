@@ -1,10 +1,10 @@
-// File: server/server.js (PHIÊN BẢN DEPLOY CLOUD)
+// File: server/server.js (PHIÊN BẢN SMART - TỰ HỌC)
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mqtt = require('mqtt');
-const path = require('path'); // <--- Thêm thư viện xử lý đường dẫn
+const path = require('path');
 
 // Import Models
 const DeviceData = require('./models/DeviceData');
@@ -16,11 +16,12 @@ app.use(cors());
 
 // --- 1. KẾT NỐI MONGODB ATLAS ---
 const cloudURI = "mongodb+srv://anh96212_db_user:anh123456@cluster0.t7ouowo.mongodb.net/tuoicay_smart?appName=Cluster0";
-
 mongoose.connect(cloudURI)
     .then(async () => {
         console.log("✅ Đã kết nối MongoDB Atlas!");
         await initUsers();
+        // Khi khởi động Server, chạy phân tích 1 lần để lấy cấu hình
+        await analyzeHistory();
     })
     .catch((err) => console.log("❌ Lỗi kết nối MongoDB:", err));
 
@@ -47,7 +48,7 @@ client.on('connect', () => {
     client.subscribe('tuoicay/data');
 });
 
-// --- BIẾN ĐỂ LỌC DỮ LIỆU ---
+// --- BIẾN HỆ THỐNG ---
 let lastSaveTime = 0;       
 let lastPumpState = -1;    
 let ramData = null;         
