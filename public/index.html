@@ -3,147 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Garden Pro</title>
+    <title>Smart Garden AI Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        /* CSS Giữ nguyên */
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f0f2f5; }
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .login-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .login-btn { width: 100%; padding: 10px; background: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;}
+        /* --- CSS MODERN STYLE --- */
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --sidebar-bg: #1e1e2d;
+            --card-bg: #ffffff;
+        }
+
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: #f0f2f5; color: var(--dark); }
         
-        #main-app { display: none; display: flex; height: 100vh; }
-        .sidebar { width: 250px; background: #2d3436; color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { margin-bottom: 30px; text-align: center; color: #00b894; }
-        .menu-item { padding: 15px; cursor: pointer; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
-        .menu-item:hover, .menu-item.active { background: #636e72; }
-        .logout { margin-top: auto; background: #d63031; text-align: center; }
-        .content { flex: 1; padding: 30px; overflow-y: auto; }
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.5s; }
-        .dashboard-grid { display: flex; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; padding: 20px; border-radius: 10px; flex: 1; min-width: 200px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        .value { font-size: 40px; font-weight: bold; color: #2d3436; }
-        .label { color: #636e72; font-size: 14px; margin-bottom: 10px; display: block;}
-        .control-panel { margin-top: 30px; background: white; padding: 20px; border-radius: 10px; }
-        .btn { padding: 12px 25px; margin-right: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
-        .btn:disabled { background-color: #ccc !important; cursor: not-allowed; }
-        .btn-on { background: #00b894; } .btn-off { background: #d63031; } .btn-auto { background: #0984e3; } .btn-manual { background: #e17055; }
-        .config-form { max-width: 400px; background: white; padding: 30px; border-radius: 10px; }
-        .date-picker { padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 20px; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Login Screen */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #4361ee, #f72585); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .login-box { background: white; padding: 40px; border-radius: 16px; width: 350px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .login-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #e0e0e0; border-radius: 8px; box-sizing: border-box; font-size: 14px; transition: 0.3s; }
+        .login-input:focus { border-color: var(--primary); outline: none; }
+        .login-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: 0.3s; }
+        .login-btn:hover { background: var(--secondary); transform: translateY(-2px); }
+
+        /* Main Layout */
+        #main-app { display: none; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: #a2a3b7; display: flex; flex-direction: column; transition: 0.3s; }
+        .sidebar-header { padding: 30px 20px; font-size: 24px; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
+        .menu-item { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.3s; font-size: 15px; margin: 5px 15px; border-radius: 10px; }
+        .menu-item:hover, .menu-item.active { background: #2b2b40; color: white; }
+        .menu-item i { width: 20px; text-align: center; }
+        .logout { margin-top: auto; margin-bottom: 20px; color: var(--danger); }
+        .logout:hover { background: rgba(247, 37, 133, 0.1); }
+
+        .content { flex: 1; padding: 30px; overflow-y: auto; background: #f5f8fa; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .user-info { display: flex; align-items: center; gap: 10px; background: white; padding: 8px 15px; border-radius: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+
+        /* Cards & Grid */
+        .section { display: none; animation: fadeIn 0.5s; }
+        .section.active { display: block; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        
+        .card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.03); transition: 0.3s; position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
+        .card-icon { position: absolute; top: 20px; right: 20px; font-size: 40px; opacity: 0.1; color: var(--primary); }
+        
+        .label { color: #7e8299; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 10px; }
+        .value { font-size: 36px; font-weight: 700; color: var(--dark); }
+        .sub-text { font-size: 12px; color: #b5b5c3; margin-top: 5px; display: block; }
+
+        /* AI Card Special */
+        .card-ai { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .card-ai .label, .card-ai .value, .card-ai .sub-text { color: white !important; }
+        .card-ai .card-icon { color: white; opacity: 0.2; }
+        .btn-ai { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-ai:hover { background: white; color: var(--primary); }
+
+        /* Controls */
+        .control-panel { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-bottom: 30px; }
+        .btn { padding: 12px 24px; margin-right: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: white; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn:disabled { background-color: #e9ecef !important; color: #adb5bd !important; cursor: not-allowed; }
+        .btn-auto { background: linear-gradient(45deg, #4361ee, #4895ef); }
+        .btn-manual { background: linear-gradient(45deg, #f72585, #b5179e); }
+        .btn-off { background: #6c757d; }
+        .btn-on { background: #2ecc71; }
+        .btn-danger { background: #e74c3c; }
+
+        /* Wifi Alert & Scheduler */
+        #wifi-alert { display: none; background: #fff0f3; color: #d63031; padding: 15px; border-radius: 10px; border: 1px solid #ffccd5; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); } }
+
+        .scheduler-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .scheduler-box { background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px dashed #ced4da; }
+        .time-input { padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-family: inherit; font-size: 16px; }
+
+        /* Chart & Inputs */
+        .date-picker { padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; margin-right: 10px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-box">
-            <h2>🔐 Đăng nhập</h2>
-            <input type="text" id="username" class="login-input" placeholder="admin / user">
+            <div style="font-size: 50px; margin-bottom: 10px;">🌱</div>
+            <h2 style="margin: 0 0 20px 0; color: #2b2d42;">Smart Garden AI</h2>
+            <input type="text" id="username" class="login-input" placeholder="Tên đăng nhập">
             <input type="password" id="password" class="login-input" placeholder="Mật khẩu">
-            <button class="login-btn" onclick="handleLogin()">VÀO HỆ THỐNG</button>
-            <p id="login-msg" style="color: red; font-size: 12px; margin-top: 10px;"></p>
+            <button class="login-btn" onclick="handleLogin()">ĐĂNG NHẬP <i class="fas fa-arrow-right"></i></button>
+            <p id="login-msg" style="color: var(--danger); font-size: 13px; margin-top: 15px;"></p>
         </div>
     </div>
 
     <div id="main-app">
         <div class="sidebar">
-            <h2>🌱 Smart Garden</h2>
-            <div class="menu-item active" onclick="showSection('dashboard')">📊 Dashboard</div>
-            <div class="menu-item" onclick="showSection('report')">📈 Báo Cáo</div>
-            <div class="menu-item" onclick="showSection('config')">⚙️ Cấu Hình</div>
-            <div class="menu-item logout" onclick="logout()">Đăng Xuất</div>
+            <div class="sidebar-header">
+                <i class="fas fa-leaf" style="color: var(--success);"></i> SmartGarden
+            </div>
+            <div class="menu-item active" onclick="showSection('dashboard')"><i class="fas fa-chart-pie"></i> Tổng Quan</div>
+            <div class="menu-item" onclick="showSection('report')"><i class="fas fa-chart-line"></i> Báo Cáo</div>
+            <div class="menu-item" onclick="showSection('config')"><i class="fas fa-cogs"></i> Cấu Hình</div>
+            <div class="menu-item logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</div>
         </div>
 
         <div class="content">
-            <h2 id="page-title">Dashboard</h2>
-            <p>Xin chào, <span id="user-role" style="font-weight: bold;">--</span></p>
-            <hr style="border: 0; border-top: 1px solid #ddd; margin-bottom: 20px;">
+            <div class="header-bar">
+                <h2 id="page-title" style="margin:0;">Dashboard</h2>
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" style="width: 30px; border-radius: 50%;">
+                    <span id="user-role" style="font-weight: 600; font-size: 14px;">--</span>
+                </div>
+            </div>
+
+            <div id="wifi-alert" style="display: none;">
+                <i class="fas fa-wifi"></i>
+                <span><b>MẤT KẾT NỐI!</b> Thiết bị không phản hồi trong 60s qua. Vui lòng kiểm tra nguồn điện.</span>
+            </div>
 
             <div id="dashboard" class="section active">
                 <div class="dashboard-grid">
                     <div class="card">
-                        <span class="label">ĐỘ ẨM ĐẤT</span>
-                        <div class="value" style="color: #00b894;"><span id="hum">--</span>%</div>
-                        <span id="hum-raw" style="font-size: 12px; color: grey;">(Raw: --)</span>
+                        <i class="fas fa-tint card-icon"></i>
+                        <span class="label">Độ Ẩm Đất</span>
+                        <div class="value" style="color: var(--success);"><span id="hum">--</span>%</div>
+                        <span class="sub-text" id="hum-raw">(Cảm biến: --)</span>
                     </div>
                     <div class="card">
-                        <span class="label">MÁY BƠM</span>
+                        <i class="fas fa-water card-icon"></i>
+                        <span class="label">Trạng thái Bơm</span>
                         <div class="value" id="pump-status">--</div>
+                        <span class="sub-text">Thời gian thực</span>
                     </div>
                     <div class="card">
-                        <span class="label">CHẾ ĐỘ</span>
-                        <div class="value" id="mode-status" style="color: #0984e3;">--</div>
+                        <i class="fas fa-robot card-icon"></i>
+                        <span class="label">Chế độ hoạt động</span>
+                        <div class="value" id="mode-status" style="color: var(--primary);">--</div>
+                        <span class="sub-text">Điều khiển</span>
+                    </div>
+                    <div class="card card-ai">
+                        <i class="fas fa-brain card-icon"></i>
+                        <span class="label">TRÍ TUỆ NHÂN TẠO (AI)</span>
+                        <div class="value" style="font-size: 28px;" id="ai-threshold">Ngưỡng: --</div>
+                        <span class="sub-text" id="ai-status" style="color: rgba(255,255,255,0.8);">Đang phân tích dữ liệu...</span>
+                        <button class="btn-ai" onclick="checkAI()"><i class="fas fa-sync-alt"></i> Cập nhật AI</button>
                     </div>
                 </div>
 
                 <div class="control-panel" id="admin-controls">
-                    <h3>🕹️ Bảng Điều Khiển</h3>
-                    <p>Chế độ:</p>
-                    <button class="btn btn-auto" onclick="sendCommand('SET_MODE_AUTO')">AUTO</button>
-                    <button class="btn btn-manual" onclick="sendCommand('SET_MODE_MANUAL')">MANUAL</button>
-                    <button class="btn btn-off" onclick="sendCommand('SET_MODE_OFF')">OFF (DỪNG)</button>
-                    <hr>
-                    <p>Bơm (Chế độ Manual):</p>
-                    <button class="btn btn-on" onclick="sendCommand('PUMP_ON')">Bật Bơm</button>
-                    <button class="btn btn-off" style="background:#e74c3c" onclick="sendCommand('PUMP_OFF')">Tắt Bơm</button>
+                    <h3 style="margin-top:0;"><i class="fas fa-gamepad"></i> Trung Tâm Điều Khiển</h3>
+                    
+                    <div class="scheduler-container">
+                        <div>
+                            <p class="label">Chọn Chế Độ:</p>
+                            <div style="margin-bottom: 20px;">
+                                <button class="btn btn-auto" onclick="sendCommand('SET_MODE_AUTO')"><i class="fas fa-magic"></i> AUTO (AI)</button>
+                                <button class="btn btn-manual" onclick="sendCommand('SET_MODE_MANUAL')"><i class="fas fa-hand-pointer"></i> MANUAL</button>
+                                <button class="btn btn-off" onclick="sendCommand('SET_MODE_OFF')"><i class="fas fa-power-off"></i> DỪNG</button>
+                            </div>
+                            
+                            <p class="label">Điều khiển Bơm (Chế độ Manual):</p>
+                            <div>
+                                <button class="btn btn-on" onclick="sendCommand('PUMP_ON')"><i class="fas fa-play"></i> BẬT BƠM</button>
+                                <button class="btn btn-danger" onclick="sendCommand('PUMP_OFF')"><i class="fas fa-stop"></i> TẮT BƠM</button>
+                            </div>
+                        </div>
+
+                        <div class="scheduler-box">
+                            <p class="label" style="color: var(--dark);"><i class="far fa-clock"></i> Lịch Tưới Tự Động (Hàng ngày)</p>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <input type="time" id="schedule-time" class="time-input">
+                                <button class="btn btn-auto" style="padding: 8px 15px; margin:0;" onclick="saveSchedule()">Lưu</button>
+                                <button class="btn btn-off" style="padding: 8px 15px; margin:0; background: #95a5a6;" onclick="clearSchedule()">Xóa</button>
+                            </div>
+                            <p id="schedule-display" style="font-size: 13px; color: #666;">Chưa có lịch.</p>
+                        </div>
+                    </div>
                 </div>
-                <div id="guest-msg" style="display:none; color: red; margin-top:20px;">Bạn là User, chỉ được xem thông tin.</div>
+                <div id="guest-msg" style="display:none; text-align:center; color: var(--danger);">Bạn là Khách (User), chỉ có quyền xem.</div>
             </div>
 
             <div id="report" class="section">
-                <h3>Thống kê lịch sử</h3>
-                
-                <label>Chọn ngày xem: </label>
-                <input type="date" id="report-date" class="date-picker" onchange="loadReport()">
-                <button class="btn btn-manual" style="padding: 10px;" onclick="loadReport()">Xem</button>
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3 style="margin-top:0;">Bộ Lọc Thời Gian</h3>
+                    <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                        <div>
+                            <label class="label">Từ ngày</label>
+                            <input type="date" id="date-start" class="date-picker">
+                        </div>
+                        <div>
+                            <label class="label">Đến ngày</label>
+                            <input type="date" id="date-end" class="date-picker">
+                        </div>
+                        <button class="btn btn-manual" style="margin:0; height: 40px;" onclick="loadReport()"><i class="fas fa-filter"></i> Lọc Dữ Liệu</button>
+                    </div>
+                </div>
 
                 <div class="dashboard-grid">
                     <div class="card">
-                        <span class="label">Số lần bật bơm</span>
+                        <span class="label">Tổng Số Lần Tưới</span>
                         <div class="value" id="rep-pump">0</div>
-                        <span>Lần</span>
+                        <span class="sub-text">Trong khoảng thời gian chọn</span>
                     </div>
                     <div class="card">
-                        <span class="label">Độ ẩm trung bình</span>
-                        <div class="value" id="rep-hum">0</div>
-                        <span>%</span>
+                        <span class="label">Độ Ẩm Trung Bình</span>
+                        <div class="value" id="rep-hum">0%</div>
+                        <span class="sub-text">Mức độ giữ nước của đất</span>
                     </div>
                 </div>
-                <br>
-                <div class="card" style="width: 100%;">
-                    <h3>Biểu đồ độ ẩm (Theo thời gian)</h3>
-                    <canvas id="myChart"></canvas>
+
+                <div class="card">
+                    <h3 style="margin-top:0;">Biểu Đồ Diễn Biến Độ Ẩm</h3>
+                    <canvas id="myChart" height="100"></canvas>
                 </div>
             </div>
 
             <div id="config" class="section">
-                <div class="config-form">
-                    <h3>⚙️ Đổi WiFi cho Thiết bị</h3>
-                    <label>SSID (Tên WiFi):</label>
-                    <input type="text" id="conf-ssid" class="login-input">
-                    <label>Password:</label>
-                    <input type="password" id="conf-pass" class="login-input">
-                    <button class="btn btn-on" style="width:100%; margin-top:10px;" onclick="saveConfig()">Gửi Cấu Hình</button>
+                <div class="config-form card" style="margin: 0 auto;">
+                    <h3 style="text-align: center;"><i class="fas fa-wifi"></i> Cấu Hình WiFi Thiết Bị</h3>
+                    <p style="text-align: center; font-size: 13px; color: #666; margin-bottom: 20px;">Nhập thông tin WiFi mới để gửi xuống ESP8266</p>
+                    
+                    <label class="label">Tên WiFi (SSID)</label>
+                    <input type="text" id="conf-ssid" class="login-input" placeholder="Ví dụ: WiFi_Nha_Minh">
+                    
+                    <label class="label">Mật khẩu</label>
+                    <input type="password" id="conf-pass" class="login-input" placeholder="********">
+                    
+                    <button class="btn btn-auto" style="width:100%; justify-content: center; margin-top: 10px;" onclick="saveConfig()"><i class="fas fa-paper-plane"></i> Gửi Cấu Hình</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const IP = ""; 
+        const IP = ""; // Tự động lấy host
         let currentUser = null;
         let chartInstance = null;
-
         const SENSOR_DRY = 1024; 
         const SENSOR_WET = 400;  
+        
+        // Biến lịch trình
+        let scheduledTime = localStorage.getItem('smartGardenSchedule') || null;
+        let isScheduleTriggered = false; 
 
         function convertHum(rawVal) {
             let percent = ((SENSOR_DRY - rawVal) / (SENSOR_DRY - SENSOR_WET)) * 100;
-            if (percent < 0) percent = 0;
-            if (percent > 100) percent = 100;
-            return Math.round(percent);
+            return Math.max(0, Math.min(100, Math.round(percent)));
         }
 
         async function handleLogin() {
@@ -160,14 +271,18 @@
                     currentUser = data;
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('main-app').style.display = 'flex';
-                    document.getElementById('user-role').innerText = data.name;
+                    document.getElementById('user-role').innerText = data.name; // Hiển thị tên
                     if (data.role === 'user') {
                         document.getElementById('admin-controls').style.display = 'none';
                         document.getElementById('guest-msg').style.display = 'block';
                     }
                     
-                    document.getElementById('report-date').valueAsDate = new Date();
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('date-start').value = today;
+                    document.getElementById('date-end').value = today;
+
                     startDashboard();
+                    updateScheduleUI();
                 } else {
                     document.getElementById('login-msg').innerText = data.message;
                 }
@@ -180,27 +295,119 @@
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
-            if (id === 'report') loadReport();
+            // Highlight menu item
+            // Logic đơn giản để active đúng menu
+            const menus = document.querySelectorAll('.menu-item');
+            if(id=='dashboard') menus[0].classList.add('active');
+            if(id=='report') menus[1].classList.add('active');
+            if(id=='config') menus[2].classList.add('active');
+
+            document.getElementById("page-title").innerText = id === 'config' ? 'Cấu Hình' : (id === 'report' ? 'Báo Cáo' : 'Dashboard');
+
+            if (id === 'report') loadReport(); 
         }
 
         async function updateDashboard() {
             try {
                 let res = await fetch(IP + "/api/web/current");
                 let data = await res.json();
+                
+                // --- CẢNH BÁO WIFI ---
+                if (data.timestamp) {
+                    const lastUpdate = new Date(data.timestamp);
+                    const now = new Date();
+                    const diffSeconds = (now - lastUpdate) / 1000;
+                    
+                    const alertBox = document.getElementById('wifi-alert');
+                    if (diffSeconds > 60) { 
+                        alertBox.style.display = 'flex';
+                    } else {
+                        alertBox.style.display = 'none';
+                    }
+                }
+
                 document.getElementById("hum").innerText = convertHum(data.humidity);
                 document.getElementById("hum-raw").innerText = "(Raw: " + data.humidity + ")";
-                document.getElementById("pump-status").innerText = data.pumpState == 1 ? "ĐANG BẬT" : "ĐANG TẮT";
+                
+                const pStatus = data.pumpState == 1 ? "ĐANG BẬT" : "ĐANG TẮT";
+                const pColor = data.pumpState == 1 ? "var(--success)" : "#95a5a6";
+                const pEl = document.getElementById("pump-status");
+                pEl.innerText = pStatus;
+                pEl.style.color = pColor;
+
                 let mStt = "OFF";
-                if(data.mode == 1) mStt = "AUTO";
+                if(data.mode == 1) mStt = "AUTO (AI)";
                 if(data.mode == 2) mStt = "MANUAL";
                 document.getElementById("mode-status").innerText = mStt;
             } catch(e) {}
         }
 
+        async function checkAI() {
+            try {
+                document.getElementById('ai-status').innerText = "Đang kết nối Server...";
+                let res = await fetch(IP + "/api/test-smart");
+                let data = await res.json();
+                document.getElementById('ai-threshold').innerText = "Ngưỡng: " + data.config.threshold;
+                document.getElementById('ai-status').innerText = data.config.status;
+            } catch(e) {
+                document.getElementById('ai-status').innerText = "Lỗi kết nối AI";
+            }
+        }
+
+        // Lịch Trình + Tự tắt sau 2 phút
+        function checkScheduleLoop() {
+            if (!scheduledTime) return; 
+            const now = new Date();
+            const currentHM = now.toTimeString().substring(0, 5); 
+            if (currentHM === scheduledTime) {
+                if (!isScheduleTriggered) {
+                    sendCommand('PUMP_ON'); 
+                    setTimeout(() => {
+                        sendCommand('PUMP_OFF');
+                        console.log("⏰ Đã tự động tắt bơm (timeout).");
+                    }, 120000); // 2 phút
+                    isScheduleTriggered = true; 
+                }
+            } else {
+                isScheduleTriggered = false; 
+            }
+        }
+
+        function saveSchedule() {
+            const timeVal = document.getElementById('schedule-time').value;
+            if (!timeVal) return alert("Vui lòng chọn giờ!");
+            scheduledTime = timeVal;
+            localStorage.setItem('smartGardenSchedule', scheduledTime);
+            updateScheduleUI();
+            alert("Đã lưu lịch tưới: " + scheduledTime);
+        }
+
+        function clearSchedule() {
+            scheduledTime = null;
+            localStorage.removeItem('smartGardenSchedule');
+            updateScheduleUI();
+            alert("Đã xóa lịch.");
+        }
+
+        function updateScheduleUI() {
+            const display = document.getElementById('schedule-display');
+            const input = document.getElementById('schedule-time');
+            if (scheduledTime) {
+                display.innerHTML = `Hẹn giờ: <b style="color:var(--primary)">${scheduledTime}</b> hàng ngày (Chạy 2 phút).`;
+                input.value = scheduledTime;
+            } else {
+                display.innerText = "Chưa có lịch hẹn.";
+                input.value = "";
+            }
+        }
+
         function startDashboard() {
             updateDashboard();
-            setInterval(updateDashboard, 2000);
+            checkAI(); 
+            setInterval(() => {
+                updateDashboard();
+                checkScheduleLoop(); 
+            }, 2000);
         }
 
         async function sendCommand(cmd) {
@@ -209,18 +416,20 @@
                 method: "POST", headers: {"Content-Type":"application/json"},
                 body: JSON.stringify({cmd: cmd})
             });
-            alert("Đã gửi: " + cmd);
+            console.log("Đã gửi: " + cmd);
         }
 
-        // --- ĐÃ SỬA PHẦN NÀY ĐỂ TRỤC Y LUÔN LÀ 0-100 ---
         async function loadReport() {
             try {
-                const dateVal = document.getElementById('report-date').value;
-                let res = await fetch(IP + `/api/report/stats?date=${dateVal}`);
+                const dStart = document.getElementById('date-start').value;
+                const dEnd = document.getElementById('date-end').value;
+                if(!dStart || !dEnd) return alert("Vui lòng chọn ngày!");
+                
+                let res = await fetch(IP + `/api/report/stats?start=${dStart}&end=${dEnd}`);
                 let data = await res.json();
 
                 document.getElementById('rep-pump').innerText = data.pumpCount;
-                document.getElementById('rep-hum').innerText = convertHum(data.avgHumidity);
+                document.getElementById('rep-hum').innerText = convertHum(data.avgHumidity) + "%";
 
                 const ctx = document.getElementById('myChart').getContext('2d');
                 if (chartInstance) chartInstance.destroy();
@@ -228,31 +437,28 @@
                 chartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: data.chartData.map(d => new Date(d.timestamp).toLocaleTimeString()),
+                        labels: data.chartData.map(d => {
+                            const date = new Date(d.timestamp);
+                            return `${date.getDate()}/${date.getMonth()+1} ${date.getHours()}:${date.getMinutes()}`;
+                        }),
                         datasets: [{
                             label: 'Độ ẩm (%)',
                             data: data.chartData.map(d => convertHum(d.humidity)),
-                            borderColor: '#00b894',
-                            backgroundColor: 'rgba(0, 184, 148, 0.1)',
+                            borderColor: '#4361ee',
+                            backgroundColor: 'rgba(67, 97, 238, 0.1)',
                             fill: true,
-                            tension: 0.3
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 5
                         }]
                     },
                     options: {
                         responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true, // Bắt đầu từ 0
-                                max: 100,          // Kết thúc ở 100
-                                title: {
-                                    display: true,
-                                    text: 'Độ ẩm (%)'
-                                }
-                            }
-                        }
+                        interaction: { mode: 'index', intersect: false },
+                        scales: { y: { beginAtZero: true, max: 100 } }
                     }
                 });
-            } catch(e) { console.log(e); }
+            } catch(e) { console.log(e); alert("Lỗi tải báo cáo"); }
         }
 
         function saveConfig() {
@@ -264,5 +470,4 @@
         }
     </script>
 </body>
-
-</html>
+</html>s
